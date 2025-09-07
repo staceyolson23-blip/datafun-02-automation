@@ -8,6 +8,7 @@ from datetime import datetime
 import random
 import statistics
 import json
+import re
 
 # Try to import your Module 1 tagline; fall back if it's not there yet.
 try:
@@ -145,11 +146,29 @@ def categorize_number(x: int) -> str:
         return "positive"
     
 def note_to_readme(section_title: str, lines: list[str]) -> None:
-    """Append a small bulleted section to README.md."""
+    """
+    Keep a single auto-maintained notes block in README.md.
+    Replaces the block between AUTO_NOTES markers if present; otherwise adds it.
+    """
     readme = PROJECT_ROOT / "README.md"
-    block = ["", f"## {section_title}", ""] + [f"- {ln}" for ln in lines] + [""]
-    with readme.open("a", encoding="utf-8") as f:
-        f.write("\n".join(block))
+    start = "<!-- AUTO_NOTES_START -->"
+    end   = "<!-- AUTO_NOTES_END -->"
+
+    section = "\n".join(
+        ["", f"## {section_title}", ""] + [f"- {ln}" for ln in lines] + ["", ""]
+    )
+
+    text = readme.read_text(encoding="utf-8") if readme.exists() else f"# {PROJECT_ROOT.name}\n\n"
+
+    if start in text and end in text:
+        # replace existing block
+        pattern = re.compile(re.escape(start) + r"[\s\S]*?" + re.escape(end))
+        new_text = pattern.sub(f"{start}\n{section}{end}", text, count=1)
+    else:
+        # add new block at the end
+        new_text = text + f"\n{start}\n{section}{end}\n"
+
+    readme.write_text(new_text, encoding="utf-8")
 
 if __name__ == "__main__":
     main()
