@@ -1,6 +1,9 @@
 """
-P2: Python Scripting & Automation — Stacey
-Goal right now: folders + a tiny CSV.
+Author: Stacey Olson
+Course: Data Analytics Fundamentals
+Assignment: P2 — Python Scripting & Automation
+Description: Practicing Chapters 3 & 4 (comprehensions, branching, try/except, file I/O).
+I chose timestamped filenames so artifacts don’t get overwritten between runs.
 """
 
 from pathlib import Path
@@ -10,15 +13,8 @@ import statistics
 import json
 import re
 
-# Try to import your Module 1 tagline; fall back if it's not there yet.
-try:
-    from utils_stacey import get_tagline  # type: ignore
-except Exception:
-    try:
-        from utils import get_tagline  # type: ignore
-    except Exception:
-        def get_tagline() -> str:
-            return "Project Setup • (using fallback tagline)"
+# Import Module 1 tagline
+from utils_stacey import get_tagline
 
 # --- Project paths ---
 PROJECT_ROOT = Path(__file__).parent
@@ -30,20 +26,40 @@ ARCHIVE_DIR  = PROJECT_ROOT / "archive"
 DIRECTORIES  = [DATA_DIR, REPORTS_DIR, IMAGES_DIR, OUTPUTS_DIR, ARCHIVE_DIR]
 
 def ensure_dirs(dirs: list[Path]) -> list[Path]:
-    """Create any missing directories and return the ones that were newly created."""
+    """
+    Make sure my project folders exist.
+    Why: I want a predictable layout so later scripts can rely on these paths.
+    Returns: list of new directories created (so I can print a friendly message).
+    """
     created = [d for d in dirs if not d.exists()]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
     return created
 
 def timestamp(fmt: str = "%Y-%m-%d_%H-%M-%S") -> str:
+    """
+    Return a filesystem-friendly timestamp string.
+    Note: I prefer underscores instead of spaces/colons to avoid cross-platform issues.
+    """
     return datetime.now().strftime(fmt)
 
 def build_path(directory: Path, stem: str, ext: str) -> Path:
+    """
+    Build a timestamped filename like data/numbers_2025-09-06_22-27-42.csv.
+    Reason: I don’t want to overwrite older runs while I’m iterating.
+    """
     suffix = ext if ext.startswith(".") else f".{ext}"
     return directory / f"{stem}_{timestamp()}{suffix}"
 
 def write_sample_csv(path: Path, rows: int = 12) -> Path:
+    """
+    Write a tiny CSV with n, n^2, n^3.
+
+    Why this is here: quick practice with loops, f-strings, and file I/O.
+    I keep it small so I can eyeball the file contents easily.
+    """
+    rows = max(1, int(rows))
+
     header = "n,square,cube"
     lines = [header]
     for n in range(1, rows + 1):
@@ -52,6 +68,7 @@ def write_sample_csv(path: Path, rows: int = 12) -> Path:
     return path
 
 def main() -> None:
+    
     print(get_tagline())
     print("Hello from P2!")
 
@@ -90,16 +107,22 @@ def main() -> None:
     )
 
 def generate_random_numbers(n: int, low: int = 1, high: int = 100) -> list[int]:
-    """Return a list of n random integers in [low, high]."""
+    """
+    Return a list of n random integers in [low, high].
+
+    Intent: explicit list comprehension usage (required for this assignment).
+    """
     return [random.randint(low, high) for _ in range(n)]  # list comprehension ✅
 
 def summarize_numbers(nums: list[int]) -> dict:
     """
-    Return summary stats + comprehension practice.
-      - evens (list comp)
-      - odds (list comp)
-      - unique values (set comp)
-      - squares (dict comp for first 10 numbers)
+    Compute a quick numeric summary + comprehension practice.
+
+    Choices:
+      - list comps for evens/odds to practice filtering
+      - set comp to count unique values
+      - dict comp to map first 10 numbers → squares (small, inspectable slice)
+      - statistics: I’m using *population* stdev (pstdev) here on purpose
     """
     evens = [x for x in nums if x % 2 == 0]
     odds  = [x for x in nums if x % 2 != 0]
@@ -125,12 +148,19 @@ def summarize_numbers(nums: list[int]) -> dict:
 
 
 def dump_json(obj: dict, path: Path) -> Path:
-    """Write a dict to pretty JSON."""
+    """
+    Write a dict to pretty JSON.
+    I sort keys so diffs are stable in Git, which makes code reviews cleaner.
+    """
     path.write_text(json.dumps(obj, indent=2, sort_keys=True), encoding="utf-8")
     return path
 
 def safe_divide(a: float, b: float) -> float | None:
-    """Return a/b, or None if b == 0 (demo try/except)."""
+    """
+    Return a/b, or None if b == 0.
+    Why None: I’d rather return a sentinel than explode my script for this demo.
+    In a bigger app I might raise a ValueError and let the caller decide.
+    """
     try:
         return a / b
     except ZeroDivisionError:
@@ -148,7 +178,8 @@ def categorize_number(x: int) -> str:
 def note_to_readme(section_title: str, lines: list[str]) -> None:
     """
     Keep a single auto-maintained notes block in README.md.
-    Replaces the block between AUTO_NOTES markers if present; otherwise adds it.
+    My rule: replace between AUTO_NOTES markers if they exist; otherwise add them.
+    This keeps my README from growing duplicates every time I run the script.
     """
     readme = PROJECT_ROOT / "README.md"
     start = "<!-- AUTO_NOTES_START -->"

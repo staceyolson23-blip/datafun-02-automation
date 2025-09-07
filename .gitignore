@@ -28,4 +28,11 @@ __pycache__/
 # ----------------------------------------
 # Jupyter Notebook (basic ignore)
 # ----------------------------------------
-.ipynb_checkpoints
+.ipynb_checkpointsdata/*.csv
+outputs/*.json
+project.log
+__pycache__/
+data/*.csv
+outputs/*.json
+project.log
+__pycache__/
