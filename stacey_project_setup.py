@@ -72,6 +72,21 @@ def main() -> None:
     json_path = build_path(OUTPUTS_DIR, "numbers_summary", "json")
     dump_json(summary, json_path)
     print(f"Wrote JSON -> {json_path.relative_to(PROJECT_ROOT)}")
+    print("safe_divide(10, 0) ->", safe_divide(10, 0))
+    print("categorize_number(7) ->", categorize_number(7))
+    note_to_readme(
+        "P2 Automation Functions Implemented",
+        [
+            "ensure_dirs(dirs) - create project folders if missing",
+            "timestamp/build_path - timestamped artifact paths",
+            "write_sample_csv(path, rows) - tiny CSV artifact",
+            "generate_random_numbers - list comprehension",
+            "summarize_numbers - list/set/dict comprehensions + stats",
+            "dump_json - pretty JSON artifact",
+            "safe_divide - try/except example",
+            "categorize_number - if/elif/else example",
+        ],
+    )
 
 def generate_random_numbers(n: int, low: int = 1, high: int = 100) -> list[int]:
     """Return a list of n random integers in [low, high]."""
@@ -112,6 +127,29 @@ def dump_json(obj: dict, path: Path) -> Path:
     """Write a dict to pretty JSON."""
     path.write_text(json.dumps(obj, indent=2, sort_keys=True), encoding="utf-8")
     return path
+
+def safe_divide(a: float, b: float) -> float | None:
+    """Return a/b, or None if b == 0 (demo try/except)."""
+    try:
+        return a / b
+    except ZeroDivisionError:
+        return None
+
+def categorize_number(x: int) -> str:
+    """Return 'negative', 'zero', or 'positive' (demo if/elif/else)."""
+    if x < 0:
+        return "negative"
+    elif x == 0:
+        return "zero"
+    else:
+        return "positive"
+    
+def note_to_readme(section_title: str, lines: list[str]) -> None:
+    """Append a small bulleted section to README.md."""
+    readme = PROJECT_ROOT / "README.md"
+    block = ["", f"## {section_title}", ""] + [f"- {ln}" for ln in lines] + [""]
+    with readme.open("a", encoding="utf-8") as f:
+        f.write("\n".join(block))
 
 if __name__ == "__main__":
     main()
